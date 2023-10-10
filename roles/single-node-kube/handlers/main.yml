@@ -1,0 +1,5 @@
+---
+# handlers file for single-node-kube
+- name: Update APT cache
+  apt:
+    update_cache: yes

@@ -1,0 +1,29 @@
+---
+
+#Version of the machine
+os: xUbuntu_22.04
+
+#Version of CRI-O
+version: 1.28.0
+
+kubelet_version: 1.27.0
+kubeadm_version: 1.27.0
+kubectl_version: 1.27.0
+
+#Ansible user on remote machines
+ansible_user: node
+
+#Kernel Modules
+kernel_modules:
+- overlay
+- br_netfilter
+
+#System control parameters
+sysctl_params:
+- { name: net.bridge.bridge-nf-call-iptables, value: 1 }
+- { name: net.ipv4.ip_forward, value: 1 }
+- { name: net.bridge.bridge-nf-call-ip6tables, value: 1 } 
+
+ipaddr: "{{ansible_default_ipv4.address}}"
+node_name: "{{ ansible_hostname }}"
+pod_cidr: "192.168.0.0/16"

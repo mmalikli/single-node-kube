@@ -1,0 +1,13 @@
+---
+# tasks file for single-node-kube
+- name: Prepare node for Kubernetes
+  include_tasks: ./kube-setup.yaml
+
+- name: Install Kubernetes tools
+  include_tasks: ./install-kube-tools.yaml
+
+- name: Install CNI plugin
+  include_tasks: ./install-cni-plugin
+
+- name: Init Single Node Kubernetes
+  include_tasks: ./kube-init.yaml

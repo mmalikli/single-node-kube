@@ -1,0 +1,34 @@
+- name: Single Node Kubernetes
+  hosts: all
+  become: true
+  gather_facts: true
+
+  pre_tasks:
+  - name: Update package cache
+    apt:
+      update_cache: true
+      cache_valid_time: 3600
+  
+  - name: Install required dependencies
+    package:
+      name:
+      - wget
+      - apt-transport-https
+      - ca-certificates 
+      - gnupg
+      state: present
+  
+  - name: Download the public signing key
+    get_url:
+      url: "https://pkgs.k8s.io/core:/stable:/v1.28/deb/Release.key"
+      dest: "/tmp/kubernetes-gpg-key"
+      mode: '0644'
+
+  - name: Import Kubernetes GPG key
+    command: "gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-gpg-key"
+
+  
+
+  
+  roles:
+  - single-node-kube

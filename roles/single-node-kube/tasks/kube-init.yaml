@@ -1,23 +1,21 @@
 ---
-- name: Initialize Kubernetes cluster on the master node
-  hosts: master_nodes
-  tasks:
-  - name: Initialize Kubernetes cluster
-    become: true
-    ansible.builtin.command: "sudo kubeadm init --apiserver-advertise-address={{ ipaddr }} --apiserver-cert-extra-sans={{ ipaddr }} --pod-network-cidr={{ pod_cidr }} --node-name={{ node_name }}"
-    #ignore_errors: true
+- name: Initialize Kubernetes cluster
+  ansible.builtin.command: "kubeadm init --apiserver-advertise-address={{ ipaddr }} --apiserver-cert-extra-sans={{ ipaddr }} --pod-network-cidr={{ pod_cidr }} --node-name={{ node_name }}"
+  #ignore_errors: true
 
-  - name: Create .kube directory
-    become_user: "{{ansible_user_id}}"
-    ansible.builtin.file:
-      path: "{{ ansible_user_dir}}/.kube"
-      state: directory
+- name: Create .kube directory
+  become_user: "{{ansible_user_id}}"
+  ansible.builtin.file:
+    path: "{{ ansible_user_dir}}/.kube"
+    state: directory
 
-  - name: Copy admin.conf to users's kube config directory
-    become: true
-    ansible.builtin.copy:
-      remote_src: true
-      src: /etc/kubernetes/admin.conf
-      dest: "{{ ansible_user_dir}}/.kube/config"
-      owner: "{{ansible_user_uid}}"
-      group: "{{ansible_user_gid}}"
+- name: Copy admin.conf to users's kube config directory
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_user_dir}}/.kube/config"
+    owner: "{{ansible_user_uid}}"
+    group: "{{ansible_user_gid}}"
+
+- name: Make the master node schedulable
+  command: "kubectl taint nodes {{ node_name }} node-role.kubernetes.io/control-plane:NoSchedule-"

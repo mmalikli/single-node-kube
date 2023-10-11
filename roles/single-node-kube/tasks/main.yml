@@ -7,7 +7,7 @@
   include_tasks: ./install-kube-tools.yaml
 
 - name: Install CNI plugin
-  include_tasks: ./install-cni-plugin
+  include_tasks: ./install-cni-plugin.yaml
 
 - name: Init Single Node Kubernetes
   include_tasks: ./kube-init.yaml

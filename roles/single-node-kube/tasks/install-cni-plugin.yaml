@@ -21,18 +21,23 @@
 #systemctl enable --now crio
 
 ---
-- name: Add buster-backports repository
-  lineinfile:
-    dest: /etc/apt/sources.list.d/backports.list
-    line: 'deb http://deb.debian.org/debian buster-backports main'
-  notify: Update APT cache
+# - name: Ensure the buster-backports repository file exists
+#   file:
+#     path: /etc/apt/sources.list.d/backports.list
+#     state: touch
+    
+# - name: Add buster-backports repository
+#   lineinfile:
+#     dest: /etc/apt/sources.list.d/backports.list
+#     line: 'deb http://deb.debian.org/debian buster-backports main'
+#   notify: Update APT cache
 
 
-- name: Install libseccomp2 from buster-backports
-  apt:
-    name: libseccomp2
-    state: present
-    default_release: buster-backports
+# - name: Install libseccomp2 from buster-backports
+#   apt:
+#     name: libseccomp2
+#     state: present
+#     default_release: buster-backports
 
 - name: Create libcontainers stable list  
   shell: echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable//{{ os }}/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list

@@ -1,17 +1,17 @@
 ---
 - name: Install kubelet, kubeadm, and kubectl
-    ansible.builtin.apt:
-      name:
-      - kubelet={{ kubelet_version }}
-      - kubeadm={{ kubeadm_version }}
-      - kubectl={{ kubectl_version }}
-      state: present
-      update_cache: true
+  ansible.builtin.apt:
+    name:
+    - kubelet={{ kubelet_version }}
+    - kubeadm={{ kubeadm_version }}
+    - kubectl={{ kubectl_version }}
+    state: present
+    update_cache: true
 
 - name: Pin the version of kubeadm
-    ansible.builtin.dpkg_selections:
-      name: kubeadm
-      selection: hold
+  ansible.builtin.dpkg_selections:
+    name: kubeadm
+    selection: hold
       
 - name: Pin the version of kubectl
   ansible.builtin.dpkg_selections:

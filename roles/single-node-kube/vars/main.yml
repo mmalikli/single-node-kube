@@ -1,2 +1,6 @@
 ---
 # vars file for single-node-kube
+ansible_env:
+  HOME: /home/{{ node_name }}
+  U: "{{ node_name }}"
+  G: "{{ node_name }}"

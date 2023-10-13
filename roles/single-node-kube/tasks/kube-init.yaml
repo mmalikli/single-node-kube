@@ -1,21 +1,78 @@
 ---
+# TODO Pull the images beforehand
+- name: Pull the required images
+  ansible.builtin.command: "kubeadm config images pull"
+  register: image_res
+
+- name: Dubug Images
+  debug:
+    var: image_res.stdout_lines
+
 - name: Initialize Kubernetes cluster
   ansible.builtin.command: "kubeadm init --apiserver-advertise-address={{ ipaddr }} --apiserver-cert-extra-sans={{ ipaddr }} --pod-network-cidr={{ pod_cidr }} --node-name={{ node_name }}"
   #ignore_errors: true
+  register: kubeadm_output
 
-- name: Create .kube directory
+- name: Print kubeadm output
+  ansible.builtin.debug:
+    var: kubeadm_output.stdout_lines
+
+- name: Create .kube directory for {{ ansible_user_id }} user
   become_user: "{{ansible_user_id}}"
   ansible.builtin.file:
     path: "{{ ansible_user_dir}}/.kube"
     state: directory
+    owner: "{{ansible_user_uid}}"
+    group: "{{ansible_user_gid}}"
+  register: user_dir
 
-- name: Copy admin.conf to users's kube config directory
+- name: Ensure that .kube directory exists for {{ node_name}} user
+  ansible.builtin.file:
+    path: "{{ ansible_env.HOME }}/.kube"
+    state: directory
+    owner: "{{ ansible_env.U }}"
+    group: "{{ ansible_env.G }}"
+  register: user_dir
+
+- name: Debug User Dir
+  ansible.builtin.debug:
+    msg: "The dir is {{ user_dir }}"
+
+- name: Copy admin.conf to {{ansible_user_id }} .kube config directory
+  #ansible.builtin.command: "mv /root/.kube/admin.conf {{ user_dir.path}}/config"
   ansible.builtin.copy:
     remote_src: true
     src: /etc/kubernetes/admin.conf
-    dest: "{{ ansible_user_dir}}/.kube/config"
-    owner: "{{ansible_user_uid}}"
-    group: "{{ansible_user_gid}}"
+    dest: "{{ ansible_user_dir }}/.kube/config"
+    owner: "{{ ansible_user_uid }}"
+    group: "{{ ansible_user_gid }}"
+  register: res
+
+- name: Grant the user {{ node_name }} all priviledges over Kubernetes
+  ansible.builtin.command: "cp /root/.kube/config {{ user_dir.path}}/config"
+
+# - name: Copy admin.conf to users's kube config directory
+#   ansible.builtin.command: "mv /root/.kube/admin.conf {{ user_dir.path}}/config"
+  # ansible.builtin.copy:
+  #   remote_src: true
+  #   src: /etc/kubernetes/admin.conf
+  #   dest: "{{ ansible_env.HOME }}/.kube/config"
+  #   owner: "{{ansible_user_uid}}"
+  #   group: "{{ansible_user_gid}}"
+  # register: res
+
+# - name: Copy admin.conf to user's kube config directory
+#   ansible.builtin.synchronize:
+#     mode: push
+#     src: /etc/kubernetes/admin.conf
+#     dest: "{{ ansible_env.HOME }}/.kube/config"
+#     owner: "{{ ansible_env.U }}"
+#     group: "{{ ansible_env.G }}"
+#   register: res
+
+- name: Debug
+  ansible.builtin.debug:
+    msg: "The dest path is {{ res.dest }} {{ res.owner }} {{ res.group }} {{ res }}"
 
 - name: Make the master node schedulable
   command: "kubectl taint nodes {{ node_name }} node-role.kubernetes.io/control-plane:NoSchedule-"

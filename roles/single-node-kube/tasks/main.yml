@@ -6,8 +6,11 @@
 - name: Install Kubernetes tools
   include_tasks: ./install-kube-tools.yaml
 
-- name: Install CNI plugin
-  include_tasks: ./install-cni-plugin.yaml
+- name: Install CRIO-O CRI plugin
+  include_tasks: ./install-cri-plugin.yaml
 
 - name: Init Single Node Kubernetes
   include_tasks: ./kube-init.yaml
+
+- name: Install Calico CNI
+  include_tasks: ./install-cni-plugin.yaml 

@@ -1,0 +1,76 @@
+#echo 'deb http://deb.debian.org/debian buster-backports main' > /etc/apt/sources.list.d/backports.list
+#apt update
+#apt install -y -t buster-backports libseccomp2 || apt update -y -t buster-backports libseccomp2
+
+#echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+#echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:$VERSION.list
+
+#mkdir -p /usr/share/keyrings
+#curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/$OS/Release.key | gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg
+#curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/$VERSION/$OS/Release.key | gpg --dearmor -o /usr/share/keyrings/libcontainers-crio-archive-keyring.gpg
+
+#apt-get update
+#apt-get install cri-o cri-o-runc
+
+
+
+#sudo apt-get update 
+#sudo apt-get install -qq -y cri-o cri-o-runc cri-tools
+
+#systemctl daemon-reload
+#systemctl enable --now crio
+
+---
+# - name: Ensure the buster-backports repository file exists
+#   file:
+#     path: /etc/apt/sources.list.d/backports.list
+#     state: touch
+    
+# - name: Add buster-backports repository
+#   lineinfile:
+#     dest: /etc/apt/sources.list.d/backports.list
+#     line: 'deb http://deb.debian.org/debian buster-backports main'
+#   notify: Update APT cache
+
+
+# - name: Install libseccomp2 from buster-backports
+#   apt:
+#     name: libseccomp2
+#     state: present
+#     default_release: buster-backports
+
+- name: Create libcontainers stable list  
+  shell: echo "deb [signed-by=/usr/share/keyrings/libcontainers-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable//{{ os }}/ /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable.list
+  
+- name: Create libcontainers stable crio list
+  shell: echo "deb [signed-by=/usr/share/keyrings/libcontainers-crio-archive-keyring.gpg] https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ version }}/{{ os }} /" > /etc/apt/sources.list.d/devel:kubic:libcontainers:stable:cri-o:{{ version }}.list
+
+- name: Add the Keyrings
+  shell: curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/{{ os }}/Release.key | gpg --dearmor -o /usr/share/keyrings/libcontainers-archive-keyring.gpg
+
+- name: Add the Keyrings
+  shell: curl -L https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable:/cri-o:/{{ version }}/{{ os }}/Release.key | gpg --dearmor -o /usr/share/keyrings/libcontainers-crio-archive-keyring.gpg
+
+
+- name: Update APT cache after adding repository and keys
+  apt:
+    update_cache: yes
+
+- name: Install CRI-O packages
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - cri-o
+    - cri-o-runc
+    - cri-tools
+
+- name: Reload systemd daemon
+  systemd:
+    daemon_reload: yes
+
+- name: Enable and start CRI-O service
+  systemd:
+    name: crio
+    enabled: yes
+    state: started

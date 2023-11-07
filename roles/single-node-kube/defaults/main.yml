@@ -11,7 +11,7 @@ kubeadm_version: 1.28.2-1.1
 kubectl_version: 1.28.2-1.1
 
 #Ansible user on remote machines
-ansible_user: node
+kube_adm_user: node
 
 #Kernel Modules
 kernel_modules:

@@ -1,6 +1,6 @@
 ---
 # vars file for single-node-kube
 ansible_env:
-  HOME: /home/{{ node_name }}
-  U: "{{ node_name }}"
-  G: "{{ node_name }}"
+  HOME: /home/{{ kube_adm_user }}
+  #U: "{{ ansible_user_id }}"
+  #G: "{{ ansible_user_id }}"

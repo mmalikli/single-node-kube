@@ -9,7 +9,11 @@
     var: image_res.stdout_lines
 
 - name: Initialize Kubernetes cluster
-  ansible.builtin.command: "kubeadm init --apiserver-advertise-address={{ ipaddr }} --apiserver-cert-extra-sans={{ ipaddr }} --pod-network-cidr={{ pod_cidr }} --node-name={{ node_name }}"
+  # Private IP
+  # ansible.builtin.command: "kubeadm init --apiserver-advertise-address={{ ipaddr }} --apiserver-cert-extra-sans={{ ipaddr }} --pod-network-cidr={{ pod_cidr }} --node-name={{ node_name }}"
+  # Public IP 
+  ansible.builtin.command: "kubeadm init --control-plane-endpoint={{ ipaddr }} --apiserver-cert-extra-sans={{ ipaddr }} --pod-network-cidr={{ pod_cidr }} --node-name={{ node_name }}"
+
   #ignore_errors: true
   register: kubeadm_output
 
@@ -26,13 +30,22 @@
     group: "{{ansible_user_gid}}"
   register: user_dir
 
-- name: Ensure that .kube directory exists for {{ node_name}} user
+- name: Create .kube directory for {{ kube_adm_user }} user
+  become_user: "{{ kube_adm_user }}"
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/.kube"
     state: directory
-    owner: "{{ ansible_env.U }}"
-    group: "{{ ansible_env.G }}"
+    owner: "{{kube_adm_user}}"
+    group: "{{kube_adm_user}}"
   register: user_dir
+
+# - name: Ensure that .kube directory exists in {{ ansible_env.HOME }} directory
+#   ansible.builtin.file:
+#     path: "{{ ansible_env.HOME }}/.kube"
+#     state: directory
+#     owner: "{{ ansible_env.U }}"
+#     group: "{{ ansible_env.G }}"
+#   register: user_dir
 
 - name: Debug User Dir
   ansible.builtin.debug:
@@ -48,18 +61,18 @@
     group: "{{ ansible_user_gid }}"
   register: res
 
-- name: Grant the user {{ node_name }} all priviledges over Kubernetes
-  ansible.builtin.command: "cp /root/.kube/config {{ user_dir.path}}/config"
+# - name: Grant the user {{ node_name }} all priviledges over Kubernetes
+#   ansible.builtin.command: "cp /root/.kube/config {{ user_dir.path}}/config"
 
-# - name: Copy admin.conf to users's kube config directory
-#   ansible.builtin.command: "mv /root/.kube/admin.conf {{ user_dir.path}}/config"
-  # ansible.builtin.copy:
-  #   remote_src: true
-  #   src: /etc/kubernetes/admin.conf
-  #   dest: "{{ ansible_env.HOME }}/.kube/config"
-  #   owner: "{{ansible_user_uid}}"
-  #   group: "{{ansible_user_gid}}"
-  # register: res
+- name: Copy admin.conf to {{ kube_adm_user}} kube config directory
+  #ansible.builtin.command: "mv /root/.kube/admin.conf {{ user_dir.path}}/config"
+  ansible.builtin.copy:
+    remote_src: true
+    src: /etc/kubernetes/admin.conf
+    dest: "{{ ansible_env.HOME }}/.kube/config"
+    #owner: "{{ansible_env.U}}"
+    #group: "{{ansible_env.G}}"
+  register: res
 
 # - name: Copy admin.conf to user's kube config directory
 #   ansible.builtin.synchronize:

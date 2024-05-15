@@ -1,0 +1,5 @@
+[master_nodes]
+master ansible_host=10.143.15.150
+
+[worker_nodes]
+node01 ansible_host=10.143.15.247

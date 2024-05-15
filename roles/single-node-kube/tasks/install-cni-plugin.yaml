@@ -4,10 +4,20 @@
     state: directory
 
 
-- name: Copy the Tigera-operato CRD to the node
+- name: Copy the Tigera-operator CRD to the node
   ansible.builtin.copy:
     src: ../files/tigera-operator.yaml
     dest: "{{ansible_env.HOME}}/cni-operator/tigera-operator.yaml"
 
+- name: Copy the Calico CRD to the node
+  ansible.builtin.copy:
+    src: ../files/custom-resources.yaml
+    dest: "{{ansible_env.HOME}}/cni-operator/custom-resources.yaml"
+
+
+
 - name: Create the Tigera Operator
   command: "kubectl create -f {{ansible_env.HOME}}/cni-operator/tigera-operator.yaml"
+
+- name: Create the Calico Configuration Resources
+  command: "kubectl create -f {{ansible_env.HOME}}/cni-operator/custom-resources.yaml"

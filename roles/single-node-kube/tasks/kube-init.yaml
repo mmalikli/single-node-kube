@@ -26,6 +26,8 @@
     group: "{{ansible_user_gid}}"
   register: user_dir
 
+# Problems with different hostnames for ex node@node01 will create a problem
+
 - name: Ensure that .kube directory exists for {{ node_name}} user
   ansible.builtin.file:
     path: "{{ ansible_env.HOME }}/.kube"

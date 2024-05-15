@@ -24,6 +24,12 @@
       dest: "/tmp/kubernetes-gpg-key"
       mode: '0644'
 
+  - name: Create /etc/apt/keyrings directory
+    ansible.builtin.file:
+      path: /etc/apt/keyrings
+      state: directory
+      mode: "0755"
+
   - name: Import Kubernetes GPG key
     command: "gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg /tmp/kubernetes-gpg-key"
     #ignore_errors: true

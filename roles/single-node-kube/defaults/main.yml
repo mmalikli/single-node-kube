@@ -25,5 +25,6 @@ sysctl_params:
 - { name: net.bridge.bridge-nf-call-ip6tables, value: 1 } 
 
 ipaddr: "{{ansible_default_ipv4.address}}"
-node_name: "{{ ansible_hostname }}"
+#node_name: "{{ ansible_hostname }}"
+node_name: "node"
 pod_cidr: "192.168.0.0/16"

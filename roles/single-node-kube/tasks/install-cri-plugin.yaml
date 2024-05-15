@@ -56,6 +56,8 @@
   apt:
     update_cache: yes
 
+# CRI-O have updated its installation you should specify the version
+
 - name: Install CRI-O packages
   apt:
     name: "{{ item }}"
